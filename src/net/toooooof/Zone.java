@@ -15,6 +15,7 @@ public class Zone {
     private int maxY;
 
     private int originalWidth;
+    private double angle;
 
 
     public Zone(Set<Integer> coords, int width) {
@@ -61,6 +62,7 @@ public class Zone {
         int coordBottomX = sBottom.invAffine(maxY);
         double adjacentBottom = descendingBottom ? coordBottomX - minX : maxX - coordBottomX;
         double angleBottom = Math.atan(oppositeBottom / adjacentBottom);
+        if (descendingBottom) angleBottom = -angleBottom;
 
         Serie sTop = new Serie(top, originalWidth);
         boolean descendingTop = sTop.isDescending();
@@ -68,8 +70,9 @@ public class Zone {
         int coordTopX = sTop.invAffine(minY);
         double adjacentTop = descendingTop ? maxX - coordTopX: coordTopX - minX;
         double angleTop = Math.atan(oppositeTop / adjacentTop);
+        if (descendingTop) angleTop = -angleTop;
 
-        double angle = (angleBottom + angleTop) / 2;
+        this.angle = (angleBottom + angleTop) / 2;
 
 /*
         Serie sLeft = new Serie(left, originalWidth);
@@ -160,5 +163,9 @@ public class Zone {
 
     public int getY() {
         return minY;
+    }
+
+    public double getAngle() {
+        return angle;
     }
 }

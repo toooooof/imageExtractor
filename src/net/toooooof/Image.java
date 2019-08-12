@@ -2,6 +2,7 @@ package net.toooooof;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -100,7 +101,7 @@ public class Image {
     private void saveSubImage() {
         int cpt = 0;
         for (Zone zone : zones) {
-            BufferedImage img = new BufferedImage(zone.getWidth(), zone.getHeight(), BufferedImage.TYPE_INT_ARGB); //bufferedImage.getSubimage(zone.getX(), zone.getY(), zone.getWidth(), zone.getHeight());
+            BufferedImage img = new BufferedImage(zone.getWidth(), zone.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
             for (int i = zone.getX() ; i < zone.getX() + zone.getWidth() ; i++) {
                 for (int j = zone.getY() ; j < zone.getY() + zone.getHeight() ; j++) {
@@ -110,6 +111,14 @@ public class Image {
                     img.setRGB(i - zone.getX(), j - zone.getY(), color);
                 }
             }
+
+            AffineTransform xform = new AffineTransform();
+            xform.rotate(0.5, zone.getWidth() / 2, zone.getHeight() / 2);
+            Graphics2D g = img.createGraphics();
+            g.drawImage(img, xform, null);
+            g.dispose();
+
+
             try {
                 ImageIO.write(img, "png", new File("output-image" + (cpt++) + ".png"));
             } catch (IOException e) {
