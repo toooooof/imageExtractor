@@ -33,28 +33,20 @@ public class Zone {
 
     }
 
+    /**
+     * Scan bottom and top in order to localize the image border
+     */
     private void findBoundingRectangle() {
         int scanWidth = (int) Math.floor(((double) (maxX - minX)) * Extractor.search_boundaries_percentage / 2d);
         int startW = minX + scanWidth;
         int endW = maxX - scanWidth;
-//        int scanHeight = (int) Math.floor(((double) (maxY - minY)) * Extractor.search_boundaries_percentage / 2d);
-//        int startH = minY + scanHeight;
-//        int endH = maxY - scanHeight;
-
         List<Integer> bottom = new ArrayList<>();
         List<Integer> top = new ArrayList<>();
-//        List<Integer> left = new ArrayList<>();
-//        List<Integer> right = new ArrayList<>();
 
         for (int x = startW ; x < endW ; x++) {
             bottom.add(firstBlackCoordUp(x));
             top.add(firstBlackCoordDown(x));
         }
-
-        /*for (int y = startH ; y < endH ; y++) {
-            left.add(firstBlackCoordRight(y));
-            right.add(firstBlackCoordLeft(y));
-        }*/
 
         Serie sBottom = new Serie(bottom, originalWidth);
         boolean descendingBottom = sBottom.isDescending();
@@ -73,14 +65,6 @@ public class Zone {
         if (descendingTop) angleTop = -angleTop;
 
         this.angle = (angleBottom + angleTop) / 2;
-
-/*
-        Serie sLeft = new Serie(left, originalWidth);
-        boolean forwardLeft = sLeft.isForward();
-        double oppositeLeft = forwardLeft ? sLeft.invAffine(minY) - minX : sLeft.invAffine(maxY) - minX;
-        int coordLeftY = sLeft.affine(minX);
-        double adjacentLeft = forwardLeft ? coordLeftY - minY : maxY - coordLeftY;
-        double angleLeft = Math.atan(oppositeLeft / adjacentLeft);*/
 
         System.out.println("     ===> " +minX + " - "  + sBottom.affine(minX) + " / " + maxX + " - "  + sBottom.affine(maxX));
 
@@ -109,30 +93,6 @@ public class Zone {
         }
         return -1;
     }
-/*
-
-    private int firstBlackCoordRight(int y) {
-        int cpt = 0;
-        while (cpt < 1000000) {
-            int c = minX + cpt++ + y * originalWidth;
-            if (coords.contains(c)) {
-                return c;
-            }
-        }
-        return -1;
-    }
-
-    private int firstBlackCoordLeft(int y) {
-        int cpt = 0;
-        while (cpt < 1000000) {
-            int c = maxX - cpt++ + y * originalWidth;
-            if (coords.contains(c)) {
-                return c;
-            }
-        }
-        return -1;
-    }
-*/
 
     @Override
     public String toString() {
@@ -146,6 +106,7 @@ public class Zone {
     }
 
     public boolean belong(int x, int y) {
+        // TODO compute bounding box
         return coords.contains(x + y * originalWidth);
     }
 

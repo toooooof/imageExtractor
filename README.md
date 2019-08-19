@@ -6,3 +6,12 @@
 
   * https://euler.ac-versailles.fr/baseeuler/lexique/notion.jsp?id=29
   * https://www.maxicours.com/se/fiche/8/3/183938.html/tstt
+
+
+### installed successfully : 
+
+  * http://francoismalan.com/2013/01/how-to-batch-separate-crop-multiple-scanned-photos/
+  * http://www.simplehooman.co.uk/2013/06/gimp-deskew-plugin-compiled-for-ubuntu-64-bit/
+
+But deskew doesn't seem to work properly
+

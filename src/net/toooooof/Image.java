@@ -15,7 +15,6 @@ public class Image {
     private int width;
     private int height;
     private int[] pix;
-    private List<Zone> zones;
     private BufferedImage bufferedImage;
 
     private int[] averageBackground;
@@ -47,16 +46,11 @@ public class Image {
 
             this.averageBackground = toRGB(averageBackgroudColor(colors));
 
-
-
+            // compute if each pixel is background or not
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
 
                     int color = bufferedImage.getRGB(x, y);
-
-                    if (y < Extractor.nb_lines_reference) {
-                        colors.add(color);
-                    }
 
                     if (included(color)) {
                         pix[x + y * width] = WHITE_BOOL;
@@ -67,13 +61,15 @@ public class Image {
                 }
             }
 
+            // extract each separated black (= non-background) zone
             List<Set<Integer>> simpleZones = extractBlackZones();
+            List<Zone> zones = simpleZones.stream().map(z -> new Zone(z, width)).collect(Collectors.toList());
 
-            zones = simpleZones.stream().map(z -> new Zone(z, width)).collect(Collectors.toList());
-
+            // convert zones to pix array
             pix = buildPixelsFromZones(simpleZones);
 
-            saveSubImage();
+            // save each zone as a new image
+            saveSubImage(zones);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -98,7 +94,7 @@ public class Image {
         return (255 << 24) | (averageRed << 16) | (averageGreen << 8) | averageBlue;
     }
 
-    private void saveSubImage() {
+    private void saveSubImage(List<Zone> zones) {
         int cpt = 0;
         for (Zone zone : zones) {
             BufferedImage img = new BufferedImage(zone.getWidth(), zone.getHeight(), BufferedImage.TYPE_INT_ARGB);
@@ -112,11 +108,11 @@ public class Image {
                 }
             }
 
-            AffineTransform xform = new AffineTransform();
+           /* AffineTransform xform = new AffineTransform();
             xform.rotate(0.5, zone.getWidth() / 2, zone.getHeight() / 2);
             Graphics2D g = img.createGraphics();
             g.drawImage(img, xform, null);
-            g.dispose();
+            g.dispose();*/
 
 
             try {
