@@ -14,6 +14,11 @@ public class Zone {
     private int maxX;
     private int maxY;
 
+    private Serie top;
+    private Serie bottom;
+    private Serie left;
+    private Serie right;
+
     private int originalWidth;
     private double angle;
 
@@ -40,33 +45,33 @@ public class Zone {
         int scanWidth = (int) Math.floor(((double) (maxX - minX)) * Extractor.search_boundaries_percentage / 2d);
         int startW = minX + scanWidth;
         int endW = maxX - scanWidth;
-        List<Integer> bottom = new ArrayList<>();
-        List<Integer> top = new ArrayList<>();
+        List<Integer> lBottom = new ArrayList<>();
+        List<Integer> lTop = new ArrayList<>();
 
         for (int x = startW ; x < endW ; x++) {
-            bottom.add(firstBlackCoordUp(x));
-            top.add(firstBlackCoordDown(x));
+            lBottom.add(firstBlackCoordUp(x));
+            lTop.add(firstBlackCoordDown(x));
         }
 
-        Serie sBottom = new Serie(bottom, originalWidth);
-        boolean descendingBottom = sBottom.isDescending();
-        double oppositeBottom = descendingBottom ? (double) Math.abs(sBottom.affine(minX) - maxY) : (double) Math.abs(sBottom.affine(maxX) - maxY);
-        int coordBottomX = sBottom.invAffine(maxY);
+        bottom = new Serie(lBottom, originalWidth);
+        boolean descendingBottom = bottom.isDescending();
+        double oppositeBottom = descendingBottom ? Math.abs(bottom.y(minX) - maxY) : Math.abs(bottom.y(maxX) - maxY);
+        int coordBottomX = (int) bottom.x(maxY);
         double adjacentBottom = descendingBottom ? coordBottomX - minX : maxX - coordBottomX;
         double angleBottom = Math.atan(oppositeBottom / adjacentBottom);
         if (descendingBottom) angleBottom = -angleBottom;
 
-        Serie sTop = new Serie(top, originalWidth);
-        boolean descendingTop = sTop.isDescending();
-        double oppositeTop = descendingTop ? (double) Math.abs(sTop.affine(maxX) - minY) : (double) Math.abs(sTop.affine(minX) - minY);
-        int coordTopX = sTop.invAffine(minY);
+        top = new Serie(lTop, originalWidth);
+        boolean descendingTop = top.isDescending();
+        double oppositeTop = descendingTop ? Math.abs(top.y(maxX) - minY) : Math.abs(top.y(minX) - minY);
+        int coordTopX = (int) top.x(minY);
         double adjacentTop = descendingTop ? maxX - coordTopX: coordTopX - minX;
         double angleTop = Math.atan(oppositeTop / adjacentTop);
         if (descendingTop) angleTop = -angleTop;
 
         this.angle = (angleBottom + angleTop) / 2;
 
-        System.out.println("     ===> " +minX + " - "  + sBottom.affine(minX) + " / " + maxX + " - "  + sBottom.affine(maxX));
+        System.out.println("     ===> " +minX + " - "  + bottom.y(minX) + " / " + maxX + " - "  + bottom.affine(maxX));
 
         System.out.println(Math.toDegrees(angleBottom) + "° / " + Math.toDegrees(angleTop) + "° : " + Math.toDegrees(angle) + "°");
 

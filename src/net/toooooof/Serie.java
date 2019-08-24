@@ -3,7 +3,7 @@ package net.toooooof;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Serie {
+public class Serie extends Affine {
 
     public static class Point {
 
@@ -31,10 +31,6 @@ public class Serie {
     private double variance;
     private double covariance;
 
-    private double a;
-
-    private boolean descending;
-
     public Serie(List<Integer> coords, int width) {
         points = coords.stream().map(c -> new Point(c % width, (int)Math.floor(c / width))).collect(Collectors.toList());
 
@@ -44,9 +40,8 @@ public class Serie {
         variance = points.stream().mapToInt(p -> (p.getX() - xAverage) * (p.getX() - xAverage)).average().orElse(-1);
         covariance = points.stream().mapToInt(p -> (p.getX() - xAverage) * (p.getY() - yAverage)).average().orElse(-1);
 
-        a = covariance / variance;
+        this.a = covariance / variance;
 
-        computeDirections();
     }
 
     public Serie(List<Integer> coords, int width, int a) {
@@ -57,19 +52,6 @@ public class Serie {
 
         this.a = a;
 
-        computeDirections();
-    }
-
-    private void computeDirections() {
-        int trendHorizontal = 0;
-        for (int i = 1 ; i < points.size() ; i++) {
-            if (points.get(i).getY() > points.get(i-1).getY()) {
-                trendHorizontal++;
-            } else if (points.get(i).getY() < points.get(i-1).getY()) {
-                trendHorizontal--;
-            }
-        }
-        this.descending = trendHorizontal > 0;
     }
 
     /**
@@ -80,16 +62,18 @@ public class Serie {
      * @param x
      * @return
      */
+    @Deprecated
     public int affine(int x) {
         return (int) (((x - xAverage) * a) + yAverage);
     }
 
+    @Deprecated
     public int invAffine(int y) {
         return (int) (((y - yAverage) / a) + xAverage);
     }
 
     public boolean isDescending() {
-        return descending;
+        return a < 0;
     }
 
     public int getValueAtOrigin() {

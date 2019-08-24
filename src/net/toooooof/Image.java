@@ -72,6 +72,7 @@ public class Image {
             saveSubImage(zones);
 
         } catch (IOException e) {
+            System.err.println("Error while reading file : " + fileName);
             e.printStackTrace();
         }
     }
@@ -107,13 +108,6 @@ public class Image {
                     img.setRGB(i - zone.getX(), j - zone.getY(), color);
                 }
             }
-
-           /* AffineTransform xform = new AffineTransform();
-            xform.rotate(0.5, zone.getWidth() / 2, zone.getHeight() / 2);
-            Graphics2D g = img.createGraphics();
-            g.drawImage(img, xform, null);
-            g.dispose();*/
-
 
             try {
                 ImageIO.write(img, "png", new File("output-image" + (cpt++) + ".png"));
