@@ -31,9 +31,12 @@ public class Zone {
     private Serie.Point bottomRight;
 
 
-    public Zone(Set<Integer> coords, int width) {
+    private Extractor.Conf conf;
+
+    public Zone(Set<Integer> coords, int width, Extractor.Conf conf) {
         this.coords = coords;
         this.originalWidth = width;
+        this.conf = conf;
 
         minX = coords.stream().min(Comparator.comparingInt(o -> o % width)).orElse(-1) % width;
         maxX = coords.stream().max(Comparator.comparingInt(o -> o % width)).orElse(-1) % width;
@@ -53,10 +56,10 @@ public class Zone {
      * Scan bottom and top in order to localize the image border
      */
     private void findBoundingRectangle() {
-        int scanWidth = (int) Math.floor(((double) (maxX - minX)) * Extractor.search_boundaries_percentage / 2d);
+        int scanWidth = (int) Math.floor(((double) (maxX - minX)) * conf.getSearchBoundariesPercentage() / 2d);
         int startW = minX + scanWidth;
         int endW = maxX - scanWidth;
-        int scanHeight = (int) Math.floor(((double) (maxY - minY)) * Extractor.search_boundaries_percentage / 2d);
+        int scanHeight = (int) Math.floor(((double) (maxY - minY)) * conf.getSearchBoundariesPercentage() / 2d);
         int startH = minY + scanHeight;
         int endH = maxY - scanHeight;
 

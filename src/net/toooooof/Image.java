@@ -2,7 +2,6 @@ package net.toooooof;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +21,10 @@ public class Image {
     private static int BLACK_BOOL = 1;
     private static int WHITE_BOOL = 0;
 
-    public Image(String fileName) {
+    private Extractor.Conf conf;
+
+    public Image(String fileName, Extractor.Conf conf) {
+        this.conf = conf;
 
         try {
             this.bufferedImage = ImageIO.read(new File(fileName));
@@ -36,7 +38,7 @@ public class Image {
             List<Integer> colors = new ArrayList<>();
 
             for (int x = 0; x < width; x++) {
-                for (int y = 0; y < Extractor.nb_lines_reference; y++) {
+                for (int y = 0; y < conf.getNbLinesReference(); y++) {
 
                     int color = bufferedImage.getRGB(x, y);
                     colors.add(color);
@@ -63,7 +65,7 @@ public class Image {
 
             // extract each separated black (= non-background) zone
             List<Set<Integer>> simpleZones = extractBlackZones();
-            List<Zone> zones = simpleZones.stream().map(z -> new Zone(z, width)).collect(Collectors.toList());
+            List<Zone> zones = simpleZones.stream().map(z -> new Zone(z, width, conf)).collect(Collectors.toList());
 
             // convert zones to pix array
             pix = buildPixelsFromZones(simpleZones);
@@ -194,7 +196,7 @@ public class Image {
 
             toExplore = toExplore.stream().filter(i -> !visited.contains(i)).collect(Collectors.toSet());
         }
-        return zones.stream().filter(zone -> zone.size() > Extractor.min_zone_size).collect(Collectors.toList());
+        return zones.stream().filter(zone -> zone.size() > conf.getMinZoneSize()).collect(Collectors.toList());
     }
 
     private int[] buildPixelsFromZones(List<Set<Integer>> zones) {
@@ -217,7 +219,7 @@ public class Image {
         diff += Math.abs(colors[2] - averageBackground[2]);
         diff += Math.abs(colors[3] - averageBackground[3]);
 
-        return diff < Extractor.tolerance;
+        return diff < conf.getTolerance();
 
     }
 
