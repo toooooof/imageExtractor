@@ -15,3 +15,6 @@
 
 But deskew doesn't seem to work properly
 
+### Issues
+
+Can't achieve a clean rotation through simple algorithms. Switching to imagemagick

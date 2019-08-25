@@ -30,4 +30,7 @@ public class Affine {
         return new Affine(-1/a, b);
     }
 
+    public double getA() {
+        return a;
+    }
 }

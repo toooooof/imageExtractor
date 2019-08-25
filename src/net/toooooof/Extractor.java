@@ -18,7 +18,7 @@ public class Extractor {
         System.out.println("Starting image parsing at " + new Date());
         long now =  System.currentTimeMillis();
 
-        Image image = new Image("T7C0008.jpg");
+        Image image = new Image("T7C0007.jpg");
 
         //new Extractor().writeImage("output3.jpg", image.getWidth(), image.getHeight(), image.getPixels());
 

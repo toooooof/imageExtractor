@@ -22,6 +22,10 @@ public class Serie extends Affine {
         public int getY() {
             return y;
         }
+
+        public String toString() {
+            return "[" + x + "," + y + "]";
+        }
     }
 
     private List<Point> points;
@@ -41,16 +45,18 @@ public class Serie extends Affine {
         covariance = points.stream().mapToInt(p -> (p.getX() - xAverage) * (p.getY() - yAverage)).average().orElse(-1);
 
         this.a = covariance / variance;
+        this.b = yAverage - xAverage*a;
 
     }
 
-    public Serie(List<Integer> coords, int width, int a) {
+    public Serie(List<Integer> coords, int width, double a) {
         points = coords.stream().map(c -> new Point(c % width, (int)Math.floor(c / width))).collect(Collectors.toList());
 
         xAverage = points.stream().mapToInt(Point::getX).sum() / points.size();
         yAverage = points.stream().mapToInt(Point::getY).sum() / points.size();
 
         this.a = a;
+        this.b = yAverage - xAverage*a;
 
     }
 
@@ -73,7 +79,7 @@ public class Serie extends Affine {
     }
 
     public boolean isDescending() {
-        return a < 0;
+        return a > 0;
     }
 
     public int getValueAtOrigin() {

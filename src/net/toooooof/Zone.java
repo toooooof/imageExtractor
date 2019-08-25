@@ -14,6 +14,9 @@ public class Zone {
     private int maxX;
     private int maxY;
 
+    private int centerX;
+    private int centerY;
+
     private Serie top;
     private Serie bottom;
     private Serie left;
@@ -21,6 +24,11 @@ public class Zone {
 
     private int originalWidth;
     private double angle;
+    private double cos;
+    private double sin;
+
+    private Serie.Point topLeft;
+    private Serie.Point bottomRight;
 
 
     public Zone(Set<Integer> coords, int width) {
@@ -31,6 +39,9 @@ public class Zone {
         maxX = coords.stream().max(Comparator.comparingInt(o -> o % width)).orElse(-1) % width;
         minY = (int) Math.floor(coords.stream().min(Comparator.comparingInt(o -> (int) Math.floor(o / width))).orElse(-1) / width);
         maxY = (int) Math.floor(coords.stream().max(Comparator.comparingInt(o -> (int) Math.floor(o / width))).orElse(-1) / width);
+
+        centerX = (maxX - minX) / 2;
+        centerY = (maxY - minY) / 2;
 
         findBoundingRectangle();
 
@@ -45,12 +56,23 @@ public class Zone {
         int scanWidth = (int) Math.floor(((double) (maxX - minX)) * Extractor.search_boundaries_percentage / 2d);
         int startW = minX + scanWidth;
         int endW = maxX - scanWidth;
+        int scanHeight = (int) Math.floor(((double) (maxY - minY)) * Extractor.search_boundaries_percentage / 2d);
+        int startH = minY + scanHeight;
+        int endH = maxY - scanHeight;
+
         List<Integer> lBottom = new ArrayList<>();
         List<Integer> lTop = new ArrayList<>();
+        List<Integer> lLeft = new ArrayList<>();
+        List<Integer> lRight = new ArrayList<>();
 
         for (int x = startW ; x < endW ; x++) {
             lBottom.add(firstBlackCoordUp(x));
             lTop.add(firstBlackCoordDown(x));
+        }
+
+        for (int y = startH ; y < endH ; y++) {
+            lLeft.add(firstBlackCoordRight(y));
+            lRight.add(firstBlackCoordLeft(y));
         }
 
         bottom = new Serie(lBottom, originalWidth);
@@ -59,7 +81,7 @@ public class Zone {
         int coordBottomX = (int) bottom.x(maxY);
         double adjacentBottom = descendingBottom ? coordBottomX - minX : maxX - coordBottomX;
         double angleBottom = Math.atan(oppositeBottom / adjacentBottom);
-        if (descendingBottom) angleBottom = -angleBottom;
+        if (!descendingBottom) angleBottom = -angleBottom;
 
         top = new Serie(lTop, originalWidth);
         boolean descendingTop = top.isDescending();
@@ -67,14 +89,62 @@ public class Zone {
         int coordTopX = (int) top.x(minY);
         double adjacentTop = descendingTop ? maxX - coordTopX: coordTopX - minX;
         double angleTop = Math.atan(oppositeTop / adjacentTop);
-        if (descendingTop) angleTop = -angleTop;
+        if (!descendingTop) angleTop = -angleTop;
 
         this.angle = (angleBottom + angleTop) / 2;
+        this.cos = Math.cos(this.angle);
+        this.sin = Math.sin(this.angle);
 
-        System.out.println("     ===> " +minX + " - "  + bottom.y(minX) + " / " + maxX + " - "  + bottom.affine(maxX));
+        double a = Math.atan(this.angle);
 
-        System.out.println(Math.toDegrees(angleBottom) + "° / " + Math.toDegrees(angleTop) + "° : " + Math.toDegrees(angle) + "°");
+        left = new Serie(lLeft, originalWidth, -1/a);
+        right = new Serie(lRight, originalWidth, -1/a);
 
+        double xintersection = intersection(left, top);
+        double yintersection = top.y(xintersection);
+
+        topLeft = new Serie.Point((int) xintersection, (int) yintersection);
+
+        xintersection = intersection(right, bottom);
+        yintersection = bottom.y(xintersection);
+
+        bottomRight = new Serie.Point((int) xintersection, (int) yintersection);
+
+        System.out.println("     ===> " +minX + " - "  + bottom.y(minX) + " / " + maxX + " - "  + bottom.y(maxX));
+        System.out.println("          interpolated " + topLeft.toString() + " - " + bottomRight.toString());
+
+        System.out.println("angle : " + Math.toDegrees(angle) + "°\n");
+
+    }
+
+    public Serie.Point rotate(int x, int y, double ang) {
+        return rotate(x, y, Math.cos(ang), Math.sin(ang));
+    }
+
+    public Serie.Point invRotate(int x, int y) {
+        return rotate(x, y, -angle);
+    }
+
+
+    public Serie.Point rotate(int x, int y) {
+        return rotate(x, y, cos, sin);
+    }
+
+    public Serie.Point rotate(Serie.Point p) {
+        return rotate(p.getX(), p.getY(), cos, sin);
+    }
+
+    private Serie.Point rotate(int x, int y, double cosinus, double sinus) {
+        int xr = (int) (centerX + (x - centerX) * cosinus - (y - centerY) * sinus);
+        int yr = (int) (centerY + (x - centerX) * sinus + (y - centerY) * cosinus);
+
+        return new Serie.Point(xr, yr);
+        //return new Serie.Point(x, y);
+    }
+
+    private double intersection(Serie vertical, Serie horizontal) {
+        double a = horizontal.getA();
+        return (a*(vertical.getValueAtOrigin() - horizontal.getValueAtOrigin()))/((a*a) + 1D);
     }
 
     private int firstBlackCoordUp(int x) {
@@ -99,6 +169,28 @@ public class Zone {
         return -1;
     }
 
+    private int firstBlackCoordRight(int y) {
+        int cpt = 0;
+        while (cpt < 1000000) {
+            int c = minX + cpt++ + y * originalWidth;
+            if (coords.contains(c)) {
+                return c;
+            }
+        }
+        return -1;
+    }
+
+    private int firstBlackCoordLeft(int y) {
+        int cpt = 0;
+        while (cpt < 1000000) {
+            int c = maxX - cpt++ + y * originalWidth;
+            if (coords.contains(c)) {
+                return c;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public String toString() {
         return "Zone{" +
@@ -111,8 +203,7 @@ public class Zone {
     }
 
     public boolean belong(int x, int y) {
-        // TODO compute bounding box
-        return coords.contains(x + y * originalWidth);
+        return x > left.x(y) && x < right.x(y) && y > top.y(x) && y < bottom.y(x);
     }
 
     public int getWidth() {
@@ -133,5 +224,13 @@ public class Zone {
 
     public double getAngle() {
         return angle;
+    }
+
+    public Serie.Point getTopLeft() {
+        return topLeft;
+    }
+
+    public Serie.Point getBottomRight() {
+        return bottomRight;
     }
 }
