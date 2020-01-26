@@ -11,10 +11,17 @@ public class Extractor {
     public static final double DEFAULT_SEARCH_BOUNDARIES_PERCENTAGE = 0.80;
     public static final String DEFAULT_OUTPUT_FILENAME = "output";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+
+        System.out.println("Starting image parsing at " + new Date());
+        long now =  System.currentTimeMillis();
 
         try {
-            Extractor extractor = new Extractor(parseOptions(args));
+            Conf conf = parseOptions(args);
+            Extractor extractor = new Extractor(conf);
+
+            Image image = new Image(conf);
+
         } catch (IllegalArgumentException e) {
             System.err.println("Error in input parameters: " + e.getMessage());
 
@@ -23,15 +30,7 @@ public class Extractor {
             System.exit(1);
         }
 
-        System.out.println("Starting image parsing at " + new Date());
-        long now =  System.currentTimeMillis();
-
-
-//        Image image = new Image("T7C0007.jpg");
-
         System.out.println("Duration : " + (System.currentTimeMillis() - now) + "ms");
-
-
 
     }
 

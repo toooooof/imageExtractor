@@ -24,12 +24,10 @@ public class Zone {
 
     private int originalWidth;
     private double angle;
-    private double cos;
-    private double sin;
-
     private Serie.Point topLeft;
     private Serie.Point bottomRight;
 
+    private String fileName;
 
     private Extractor.Conf conf;
 
@@ -95,8 +93,6 @@ public class Zone {
         if (!descendingTop) angleTop = -angleTop;
 
         this.angle = (angleBottom + angleTop) / 2;
-        this.cos = Math.cos(this.angle);
-        this.sin = Math.sin(this.angle);
 
         double a = Math.atan(this.angle);
 
@@ -118,31 +114,6 @@ public class Zone {
 
         System.out.println("angle : " + Math.toDegrees(angle) + "°\n");
 
-    }
-
-    public Serie.Point rotate(int x, int y, double ang) {
-        return rotate(x, y, Math.cos(ang), Math.sin(ang));
-    }
-
-    public Serie.Point invRotate(int x, int y) {
-        return rotate(x, y, -angle);
-    }
-
-
-    public Serie.Point rotate(int x, int y) {
-        return rotate(x, y, cos, sin);
-    }
-
-    public Serie.Point rotate(Serie.Point p) {
-        return rotate(p.getX(), p.getY(), cos, sin);
-    }
-
-    private Serie.Point rotate(int x, int y, double cosinus, double sinus) {
-        int xr = (int) (centerX + (x - centerX) * cosinus - (y - centerY) * sinus);
-        int yr = (int) (centerY + (x - centerX) * sinus + (y - centerY) * cosinus);
-
-        return new Serie.Point(xr, yr);
-        //return new Serie.Point(x, y);
     }
 
     private double intersection(Serie vertical, Serie horizontal) {
@@ -235,5 +206,13 @@ public class Zone {
 
     public Serie.Point getBottomRight() {
         return bottomRight;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 }

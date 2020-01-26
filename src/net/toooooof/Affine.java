@@ -21,7 +21,7 @@ public class Affine {
         return (y - b) / a;
     }
 
-    public static Affine perpendicalar(double a, double b) {
+    public static Affine perpendicular(double a, double b) {
 
         if (a == 0D) {
             throw new IllegalArgumentException("a cannot be null");

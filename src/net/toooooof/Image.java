@@ -23,8 +23,9 @@ public class Image {
 
     private Extractor.Conf conf;
 
-    public Image(String fileName, Extractor.Conf conf) {
+    public Image(Extractor.Conf conf) {
         this.conf = conf;
+        String fileName = conf.getInputFileName();
 
         try {
             this.bufferedImage = ImageIO.read(new File(fileName));
@@ -73,6 +74,10 @@ public class Image {
             // save each zone as a new image
             saveSubImage(zones);
 
+            zones.forEach(zone -> {
+                System.out.println(String.format("magick convert %s -rotate %f %s", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
+            });
+
         } catch (IOException e) {
             System.err.println("Error while reading file : " + fileName);
             e.printStackTrace();
@@ -102,50 +107,6 @@ public class Image {
         for (Zone zone : zones) {
             BufferedImage img = new BufferedImage(zone.getWidth(), zone.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
-            // rotation
-            /*int startX = zone.rotate(zone.getTopLeft()).getX();
-            int startY = zone.rotate(zone.getTopLeft()).getY();
-            int endX = zone.rotate(zone.getBottomRight()).getX();
-            int endY = zone.rotate(zone.getBottomRight()).getY();
-
-            for (int i = startX ; i < endX ; i++) {
-                for (int j = startY ; j < endY ; j++) {
-
-                    Serie.Point rotated = zone.invRotate(i, j );
-                    int color = 0xFF000000;
-                    try {
-                        color = bufferedImage.getRGB(rotated.getX(), rotated.getY());
-                    } catch (ArrayIndexOutOfBoundsException e) {
-
-                    }
-
-                    try {
-                        img.setRGB(i - zone.getX(), j - zone.getY(), color);
-                    } catch (ArrayIndexOutOfBoundsException ex) {
-                        //System.out.println(rotated.toString());
-                    }
-                }
-            }*/
-
-            // rotation, mais des trous !
-            /*for (int i = zone.getX() ; i < zone.getX() + zone.getWidth() ; i++) {
-                for (int j = zone.getY() ; j < zone.getY() + zone.getHeight() ; j++) {
-                    boolean belong = zone.belong(i,j);
-                    if (belong) {
-                        int color = bufferedImage.getRGB(i, j);
-                        //int alpha = belong ? 255 : 0;
-                        //color = (alpha << 24) | (color & 0x00FFFFFF);
-                        Serie.Point rotated = zone.invRotate(i - zone.getX(), j - zone.getY());
-                        //img.setRGB(i - zone.getX(), j - zone.getY(), color);
-                        try {
-                            img.setRGB(rotated.getX(), rotated.getY(), color);
-                        } catch (ArrayIndexOutOfBoundsException ex) {
-                            //System.out.println(rotated.toString());
-                        }
-                    }
-                }
-            }*/
-
            // fonctionne sans rotation
             for (int i = zone.getX() ; i < zone.getX() + zone.getWidth() ; i++) {
                 for (int j = zone.getY() ; j < zone.getY() + zone.getHeight() ; j++) {
@@ -162,7 +123,8 @@ public class Image {
 
 
             try {
-                ImageIO.write(img, "png", new File("output-image" + (cpt++) + ".png"));
+                zone.setFileName("output-image" + (cpt++) + ".png");
+                ImageIO.write(img, "png", new File(zone.getFileName()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
