@@ -1,6 +1,12 @@
 # Image Extractor
 
+## Usage
 
+ImageExtracteur is a draft
+
+Extractor is the real one
+
+Example parameters : `cartes0001.jpg --tolerance 20 --search-boundaries-percentage 0.90` 
 
 ### Sources
 

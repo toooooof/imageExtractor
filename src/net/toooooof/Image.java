@@ -18,10 +18,10 @@ public class Image {
 
     private int[] averageBackground;
 
-    private static int BLACK_BOOL = 1;
-    private static int WHITE_BOOL = 0;
+    private static final int BLACK_BOOL = 1;
+    private static final int WHITE_BOOL = 0;
 
-    private Extractor.Conf conf;
+    private final Extractor.Conf conf;
 
     public Image(Extractor.Conf conf) {
         this.conf = conf;
@@ -75,7 +75,7 @@ public class Image {
             saveSubImage(zones);
 
             zones.forEach(zone -> {
-                System.out.println(String.format("magick convert %s -rotate %f %s", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
+                System.out.println(String.format("convert %s -rotate %f %s", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
             });
 
         } catch (IOException e) {
