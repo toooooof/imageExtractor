@@ -19,7 +19,7 @@ public class Extractor {
 
         try {
             Conf conf = parseOptions(args);
-            new Extractor(conf);
+            System.out.println(conf);
             new Image(conf);
 
         } catch (IllegalArgumentException e) {
@@ -98,11 +98,6 @@ public class Extractor {
         }
 
         return conf;
-    }
-
-
-    public Extractor(Conf conf) {
-        System.out.println(conf);
     }
 
     public static class Conf {

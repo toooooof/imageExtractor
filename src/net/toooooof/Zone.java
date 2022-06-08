@@ -14,9 +14,6 @@ public class Zone {
     private int maxX;
     private int maxY;
 
-    private int centerX;
-    private int centerY;
-
     private Serie top;
     private Serie bottom;
     private Serie left;
@@ -41,12 +38,9 @@ public class Zone {
         minY = (int) Math.floor(coords.stream().min(Comparator.comparingInt(o -> (int) Math.floor(o / width))).orElse(-1) / width);
         maxY = (int) Math.floor(coords.stream().max(Comparator.comparingInt(o -> (int) Math.floor(o / width))).orElse(-1) / width);
 
-        centerX = (maxX - minX) / 2;
-        centerY = (maxY - minY) / 2;
-
         findBoundingRectangle();
 
-        System.out.println("    -- new zone found : " + this.toString());
+        System.out.println("    -- new zone found : " + this);
 
     }
 

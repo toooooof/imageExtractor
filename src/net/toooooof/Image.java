@@ -47,7 +47,7 @@ public class Image {
                 }
             }
 
-            this.averageBackground = toRGB(averageBackgroudColor(colors));
+            this.averageBackground = toRGB(averageBackgroundColor(colors));
 
             // compute if each pixel is background or not
             for (int x = 0; x < width; x++) {
@@ -74,9 +74,7 @@ public class Image {
             // save each zone as a new image
             saveSubImage(zones);
 
-            zones.forEach(zone -> {
-                System.out.println(String.format("convert %s -rotate %f %s", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
-            });
+            zones.forEach(zone -> System.out.printf("convert %s -rotate %f %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
 
         } catch (IOException e) {
             System.err.println("Error while reading file : " + fileName);
@@ -84,7 +82,7 @@ public class Image {
         }
     }
 
-    private int averageBackgroudColor(List<Integer> colors) {
+    private int averageBackgroundColor(List<Integer> colors) {
         List<Integer> reds = new ArrayList<>();
         List<Integer> greens = new ArrayList<>();
         List<Integer> blues = new ArrayList<>();
