@@ -7,26 +7,26 @@ import java.util.Set;
 
 public class Zone {
 
-    private Set<Integer> coords;
+    private final Set<Integer> coords;
 
-    private int minX;
-    private int minY;
-    private int maxX;
-    private int maxY;
+    private final int minX;
+    private final int minY;
+    private final int maxX;
+    private final int maxY;
 
     private Serie top;
     private Serie bottom;
     private Serie left;
     private Serie right;
 
-    private int originalWidth;
+    private final int originalWidth;
     private double angle;
     private Serie.Point topLeft;
     private Serie.Point bottomRight;
 
     private String fileName;
 
-    private Extractor.Conf conf;
+    private final Extractor.Conf conf;
 
     public Zone(Set<Integer> coords, int width, Extractor.Conf conf) {
         this.coords = coords;
@@ -42,16 +42,36 @@ public class Zone {
 
         System.out.println("    -- new zone found : " + this);
 
+        computeCropDistances();
+
+    }
+
+    private void computeCropDistances() {
+        var x1 = 0;
+        var x2 = 0;
+        var y1 = 0;
+        var y2 = 0;
+        if (this.top.isDescending()) {
+            x1 = (int) intersection(left, top);
+            x2 = maxX;
+        } else {
+            x1 = minX;
+            x2 = (int) intersection(right, top);
+        }
+
+        var distance = Math.abs(x2 - x1);
+        var verticalDistance = (int) Math.sin(angle) * distance;
+        System.out.println("      -- Vertical crop distance: " + (maxY - minY - verticalDistance*2));
     }
 
     /**
      * Scan bottom and top in order to localize the image border
      */
     private void findBoundingRectangle() {
-        int scanWidth = (int) Math.floor(((double) (maxX - minX)) * conf.getSearchBoundariesPercentage() / 2d);
+        int scanWidth = (int) Math.floor((maxX - minX) * conf.getSearchBoundariesPercentage() / 2d);
         int startW = minX + scanWidth;
         int endW = maxX - scanWidth;
-        int scanHeight = (int) Math.floor(((double) (maxY - minY)) * conf.getSearchBoundariesPercentage() / 2d);
+        int scanHeight = (int) Math.floor((maxY - minY) * conf.getSearchBoundariesPercentage() / 2d);
         int startH = minY + scanHeight;
         int endH = maxY - scanHeight;
 
