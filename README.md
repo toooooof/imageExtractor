@@ -25,3 +25,8 @@ But deskew doesn't seem to work properly
 ### Issues
 
 Can't achieve a clean rotation through simple algorithms. Switching to imagemagick
+
+
+### crop
+
+convert cropme.png  -gravity Center -crop 534x623+0+0 cropped.png

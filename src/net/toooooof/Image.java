@@ -74,7 +74,11 @@ public class Image {
             // save each zone as a new image
             saveSubImage(zones);
 
-            zones.forEach(zone -> System.out.printf("convert %s -rotate %f %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName()));
+            zones.forEach(zone -> {
+                System.out.printf("convert %s -rotate %f %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName());
+                System.out.printf("convert %s -gravity Center -crop %s+0+0 %s%n", "rotated-" + zone.getFileName(), zone.getCropString(), "cropped-" + zone.getFileName());
+                //System.out.printf("convert %s -rotate %f -gravity Center -crop %s+0+0 %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), zone.getCropString(), "cropped-" + zone.getFileName());
+            });
 
         } catch (IOException e) {
             System.err.println("Error while reading file : " + fileName);

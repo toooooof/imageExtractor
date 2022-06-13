@@ -7,6 +7,7 @@ import java.util.Set;
 
 public class Zone {
 
+    public static final double SECURITY_RATIO = 1.1;
     private final Set<Integer> coords;
 
     private final int minX;
@@ -24,9 +25,12 @@ public class Zone {
     private Serie.Point topLeft;
     private Serie.Point bottomRight;
 
+    private String cropString;
+
     private String fileName;
 
     private final Extractor.Conf conf;
+
 
     public Zone(Set<Integer> coords, int width, Extractor.Conf conf) {
         this.coords = coords;
@@ -54,14 +58,20 @@ public class Zone {
         if (this.top.isDescending()) {
             x1 = (int) intersection(left, top);
             x2 = maxX;
+            y1 = minY;
+            y2 = (int) right.y(maxX);
         } else {
             x1 = minX;
             x2 = (int) intersection(right, top);
+            y1 = (int) right.y(maxX);
+            y2 = maxY;
         }
 
-        var distance = Math.abs(x2 - x1);
-        var verticalDistance = (int) Math.sin(angle) * distance;
-        System.out.println("      -- Vertical crop distance: " + (maxY - minY - verticalDistance*2));
+        var distanceX = Math.abs(x2 - x1);
+        var verticalDistance = (int) (Math.sin(angle) * distanceX);
+        var distanceY = Math.abs(y2 - y1);
+        var horizontalDistance = (int) (Math.cos(angle) * distanceY);
+        this.cropString = (int)((maxX - minX - horizontalDistance)* SECURITY_RATIO) + "x" + (int)((maxY - minY - verticalDistance)* SECURITY_RATIO);
     }
 
     /**
@@ -228,5 +238,9 @@ public class Zone {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getCropString() {
+        return cropString;
     }
 }
