@@ -71,7 +71,7 @@ public class Zone {
         var verticalDistance = (int) (Math.sin(angle) * distanceX);
         var distanceY = Math.abs(y2 - y1);
         var horizontalDistance = (int) (Math.cos(angle) * distanceY);
-        this.cropString = (int)((maxX - minX - horizontalDistance)* SECURITY_RATIO) + "x" + (int)((maxY - minY - verticalDistance)* SECURITY_RATIO);
+        this.cropString = (int)((maxX - minX - horizontalDistance*2)* SECURITY_RATIO) + "x" + (int)((maxY - minY - verticalDistance*2)* SECURITY_RATIO)+"-" + horizontalDistance + "-" + verticalDistance;
     }
 
     /**
@@ -222,6 +222,10 @@ public class Zone {
 
     public double getAngle() {
         return angle;
+    }
+
+    public double getAngleDegrees() {
+        return Math.toDegrees(angle);
     }
 
     public Serie.Point getTopLeft() {

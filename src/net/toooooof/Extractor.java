@@ -10,7 +10,9 @@ public class Extractor {
     public static final int DEFAULT_MIN_ZONE_SIZE = 5000;
     public static final int DEFAULT_NB_LINES_REFERENCE = 10;
     public static final double DEFAULT_SEARCH_BOUNDARIES_PERCENTAGE = 0.80;
-    public static final String DEFAULT_OUTPUT_FILENAME = "output";
+    public static final String DEFAULT_OUTPUT_FILENAME = "image";
+    public static final String DEFAULT_COMMAND_FILENAME = "commands.sh";
+    public static final String DEFAULT_IMAGE_PREFIX = "t7c-";
 
     public static void main(String[] args) {
 
@@ -47,6 +49,8 @@ public class Extractor {
         System.out.println("\n    --expected-zones <int> : the number of elements on the source image. Throw an error if different from what is found. Ignored if not provided");
         System.out.println("\n    --output-files <string,string> : Comma separated strings for output files. Must match --expected-zones if provided. Overrides --ouput-file-schema . Ignored if not provided");
         System.out.println("\n    --output-file-pattern <string> : Output file base name (incremented). Do not add file extension (png implied). Default: " + DEFAULT_OUTPUT_FILENAME);
+        System.out.println("\n    --command-output-file <string> : Output file name for commands (imagemagick). Default: " + DEFAULT_COMMAND_FILENAME);
+        System.out.println("\n    --starting-image-counter <int> : counter for image file naming (output-imageXXX). Default: 0");
     }
 
     public static Conf parseOptions(String[] args) {
@@ -66,34 +70,32 @@ public class Extractor {
             String v = args[i*2 + 2];
 
             switch (k) {
-                case "--tolerance":
-                    conf.setTolerance(Integer.parseInt(v));
-                    break;
-                case "--min-zone-size":
-                    conf.setMinZoneSize(Integer.parseInt(v));
-                    break;
-                case "--nb-lines-reference":
-                    conf.setNbLinesReference(Integer.parseInt(v));
-                    break;
-                case "--search-boundaries-percentage":
-                    conf.setSearchBoundariesPercentage(Double.parseDouble(v));
-                    break;
-                case "--output-file-pattern":
-                    conf.setOutputFilePattern(v);
-                    break;
-                case "--output-files":
+                case "--tolerance" -> conf.setTolerance(Integer.parseInt(v));
+                case "--starting-image-counter" -> conf.setStartingCounter(Integer.parseInt(v));
+                case "--command-output-file" -> conf.setOutputCommandeFile(v);
+                case "--image-prefix" -> conf.setImagePrefix(v);
+                case "--min-zone-size" -> conf.setMinZoneSize(Integer.parseInt(v));
+                case "--nb-lines-reference" -> conf.setNbLinesReference(Integer.parseInt(v));
+                case "--search-boundaries-percentage" -> conf.setSearchBoundariesPercentage(Double.parseDouble(v));
+                case "--output-file-pattern" -> conf.setOutputFilePattern(v);
+                case "--output-files" -> {
                     conf.setOutputFiles(Arrays.asList(v.split(",")));
                     if (conf.getExpectedElements() > -1 && conf.getExpectedElements() != conf.getOutputFiles().size()) {
-                        throw new IllegalArgumentException("Expecting " + conf.getExpectedElements() + " elements, but having " + conf.getOutputFiles().size() + " output file names");
+                        throw new IllegalArgumentException(
+                                "Expecting " + conf.getExpectedElements() + " elements, but having " + conf.getOutputFiles()
+                                        .size() + " output file names");
                     }
-                    break;
-                case "--expected-zones":
+                }
+                case "--expected-zones" -> {
                     conf.setExpectedElements(Integer.parseInt(v));
-                    if (conf.getExpectedElements() > -1 && conf.getOutputFiles() != null && conf.getExpectedElements() != conf.getOutputFiles().size()) {
-                        throw new IllegalArgumentException("Expecting " + conf.getExpectedElements() + " elements, but having " + conf.getOutputFiles().size() + " output file names");
+                    if (conf.getExpectedElements() > -1 && conf.getOutputFiles() != null && conf.getExpectedElements() != conf.getOutputFiles()
+                            .size()) {
+                        throw new IllegalArgumentException(
+                                "Expecting " + conf.getExpectedElements() + " elements, but having " + conf.getOutputFiles()
+                                        .size() + " output file names");
                     }
-                    break;
-                default: throw new IllegalArgumentException("Argument unknown: " + k);
+                }
+                default -> throw new IllegalArgumentException("Argument unknown: " + k);
             }
         }
 
@@ -110,6 +112,9 @@ public class Extractor {
         private String outputFilePattern = DEFAULT_OUTPUT_FILENAME;
         private List<String> outputFiles;
         private int expectedElements = -1;
+        private String outputCommandeFile = DEFAULT_COMMAND_FILENAME;
+        private int startingCounter;
+        private String imagePrefix = DEFAULT_IMAGE_PREFIX;
 
         public String getInputFileName() {
             return inputFileName;
@@ -175,16 +180,33 @@ public class Extractor {
             this.expectedElements = expectedElements;
         }
 
+        public String getOutputCommandeFile() {
+            return outputCommandeFile;
+        }
+
+        public void setOutputCommandeFile(String outputCommandeFile) {
+            this.outputCommandeFile = outputCommandeFile;
+        }
+
+        public int getStartingCounter() {
+            return startingCounter;
+        }
+
+        public void setStartingCounter(int startingCounter) {
+            this.startingCounter = startingCounter;
+        }
+
+        public String getImagePrefix() {
+            return imagePrefix;
+        }
+
+        public void setImagePrefix(String imagePrefix) {
+            this.imagePrefix = imagePrefix;
+        }
+
         @Override
         public String toString() {
-            return "Conf{" +
-                    "inputFileName='" + inputFileName + '\'' +
-                    ", tolerance=" + tolerance +
-                    ", minZoneSize=" + minZoneSize +
-                    ", nbLinesReference=" + nbLinesReference +
-                    ", searchBoundariesPercentage=" + searchBoundariesPercentage +
-                    ", outputFilePattern='" + outputFilePattern + '\'' +
-                    '}';
+            return "Conf{" + "inputFileName='" + inputFileName + '\'' + ", tolerance=" + tolerance + ", minZoneSize=" + minZoneSize + ", nbLinesReference=" + nbLinesReference + ", searchBoundariesPercentage=" + searchBoundariesPercentage + ", outputFilePattern='" + outputFilePattern + '\'' + ", outputFiles=" + outputFiles + ", expectedElements=" + expectedElements + ", outputCommandeFile='" + outputCommandeFile + '\'' + ", startingCounter=" + startingCounter + ", imagePrefix='" + imagePrefix + '\'' + '}';
         }
     }
 }

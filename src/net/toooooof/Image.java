@@ -4,6 +4,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
@@ -74,16 +76,34 @@ public class Image {
             // save each zone as a new image
             saveSubImage(zones);
 
+            List<String> commands = new ArrayList<>();
             zones.forEach(zone -> {
-                System.out.printf("convert %s -rotate %f %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), "rotated-" + zone.getFileName());
-                System.out.printf("convert %s -gravity Center -crop %s+0+0 %s%n", "rotated-" + zone.getFileName(), zone.getCropString(), "cropped-" + zone.getFileName());
+                commands.add(String.format("convert %s -rotate %f %s%n", zone.getFileName(), -zone.getAngleDegrees(), "rotated-" + zone.getFileName()));
+                if (Math.abs(zone.getAngleDegrees()) >= 1d) {
+                    commands.add(String.format("convert %s -gravity Center -crop %s %s%n", "rotated-" + zone.getFileName(), zone.getCropString(),
+                            "cropped-" + zone.getFileName()));
+                    commands.add(String.format("cp %s %s\n", "cropped-" + zone.getFileName(), conf.getImagePrefix() + zone.getFileName()));
+                } else {
+                    commands.add(String.format("cp %s %s\n", "rotated-" + zone.getFileName(), conf.getImagePrefix() + zone.getFileName()));
+                }
                 //System.out.printf("convert %s -rotate %f -gravity Center -crop %s+0+0 %s%n", zone.getFileName(), Math.toDegrees(-zone.getAngle()), zone.getCropString(), "cropped-" + zone.getFileName());
             });
+            writeCommandsToFile(commands);
 
         } catch (IOException e) {
             System.err.println("Error while reading file : " + fileName);
             e.printStackTrace();
         }
+    }
+
+    private void writeCommandsToFile(List<String> commands) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(conf.getOutputCommandeFile());
+        for (String command : commands) {
+            byte[] strToBytes = command.getBytes();
+            outputStream.write(strToBytes);
+        }
+
+        outputStream.close();
     }
 
     private int averageBackgroundColor(List<Integer> colors) {
@@ -125,7 +145,8 @@ public class Image {
 
 
             try {
-                zone.setFileName("output-image" + (cpt++) + ".png");
+                String imageName = String.format("%s%04d.png", conf.getOutputFilePattern(), (conf.getStartingCounter() + cpt++));
+                zone.setFileName(imageName);
                 ImageIO.write(img, "png", new File(zone.getFileName()));
             } catch (IOException e) {
                 e.printStackTrace();
